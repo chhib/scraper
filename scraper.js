@@ -1,11 +1,11 @@
 const puppeteer = require("puppeteer");
 const fs = require('fs');
+const loadFirebase = require('./lib/db.js');
 
 (async () => {
 
   // Extract partners on the page, recursively check the next page in the URL pattern
   const extractPartners = async url => {
-    
     // Scrape the data we want
     const page = await browser.newPage();
     await page.goto(url);
@@ -30,17 +30,43 @@ const fs = require('fs');
     }
   };
 
+  let partners;
+  // If there's a local JSON, don't fetch anything
+  const rawdata = fs.readFileSync('partners.json');  
   const browser = await puppeteer.launch();
-  const firstUrl =
-    "https://marketingplatform.google.com/about/partners/find-a-partner?page=1";
-  const partners = await extractPartners(firstUrl);
+
+  if (rawdata) {
+    partners = JSON.parse(rawdata)
+  } else {
+    const firstUrl =
+      "https://marketingplatform.google.com/about/partners/find-a-partner?page=1";
+    partners = await extractPartners(firstUrl);
+  }
+
+  
+
 
   // Todo: Update database with partners
   console.log(partners);
 
-  // Save to JSON file
-  const data = JSON.stringify(partners);  
-  fs.writeFileSync('partners.json', data);  
+  // loadFirebase().firestore().collection('agencies')
+  //   .limit(10)
+  //   .get()
+  //   .then(snapshot => {
+  //     let data = []
+  //     snapshot.forEach((doc) => {
+  //       data.push({
+  //         id: doc.id,
+  //         ...doc.data()
+  //       })            
+  //     })
+  //     return { agencies: data }
+  //   })
+
+
+  // // Save to JSON file
+  // const data = JSON.stringify(partners);  
+  // fs.writeFileSync('partners.json', data);  
 
 
   await browser.close();
