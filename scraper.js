@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const fs = require('fs');
 
 (async () => {
 
@@ -36,6 +37,11 @@ const puppeteer = require("puppeteer");
 
   // Todo: Update database with partners
   console.log(partners);
+
+  // Save to JSON file
+  const data = JSON.stringify(partners);  
+  fs.writeFileSync('partners.json', data);  
+
 
   await browser.close();
 })();
